@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Pacientes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background-color: #fff;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .filters {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .filters input {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      flex: 1;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background-color: #0078D7;
+      color: white;
+    }
+    .buttons {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      color: white;
+    }
+    .editar { background-color: #28a745; }
+    .excluir { background-color: #dc3545; }
+    .fechar { background-color: #6c757d; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Lista de Pacientes</h2>
+
+    <div class="filters">
+      <input type="text" id="nomePaciente" placeholder="Nome do paciente" oninput="filtrarPacientes()">
+      <input type="text" id="cpfPaciente" placeholder="CPF" oninput="filtrarPacientes()">
+    </div>
+
+    <table id="tabelaPacientes">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>CPF</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Linhas serão inseridas dinamicamente -->
+      </tbody>
+    </table>
+
+    <div class="buttons">
+      <button class="editar" onclick="editarPaciente()">Editar</button>
+      <button class="excluir" onclick="excluirPaciente()">Excluir</button>
+      <button class="fechar" onclick="fecharTela()">Fechar</button>
+    </div>
+  </div>
+
+  <script>
+    const pacientes = [
+      { nome: "João Silva", cpf: "123.456.789-00" },
+      { nome: "Maria Oliveira", cpf: "987.654.321-00" },
+      { nome: "Carlos Souza", cpf: "111.222.333-44" }
+    ];
+
+    let pacienteSelecionado = null;
+
+    function carregarTabela(lista) {
+      const tbody = document.querySelector("#tabelaPacientes tbody");
+      tbody.innerHTML = "";
+      lista.forEach((paciente, index) => {
+        const row = document.createElement("tr");
+        row.setAttribute("data-index", index);
+        row.innerHTML = `
+          <td>${paciente.nome}</td>
+          <td>${paciente.cpf}</td>
+        `;
+        row.onclick = () => selecionarLinha(index);
+        tbody.appendChild(row);
+      });
+    }
+
+    function selecionarLinha(index) {
+      pacienteSelecionado = index;
+      const rows = document.querySelectorAll("#tabelaPacientes tbody tr");
+      rows.forEach(row => row.style.backgroundColor = "");
+      rows[index].style.backgroundColor = "#d0e7ff";
+    }
+
+    function filtrarPacientes() {
+      const nome = document.getElementById("nomePaciente").value.toLowerCase();
+      const cpf = document.getElementById("cpfPaciente").value;
+
+      const filtrados = pacientes.filter(p =>
+        p.nome.toLowerCase().includes(nome) &&
+        p.cpf.includes(cpf)
+      );
+
+      carregarTabela(filtrados);
+    }
+
+    function editarPaciente() {
+      if (pacienteSelecionado !== null) {
+        const paciente = pacientes[pacienteSelecionado];
+        alert(`Editar paciente:\nNome: ${paciente.nome}\nCPF: ${paciente.cpf}`);
+        // Aqui você pode redirecionar para uma tela de edição real
+      } else {
+        alert("Selecione um paciente na tabela.");
+      }
+    }
+
+    function excluirPaciente() {
+      if (pacienteSelecionado !== null) {
+        const confirmacao = confirm("Deseja realmente excluir este paciente?");
+        if (confirmacao) {
+          pacientes.splice(pacienteSelecionado, 1);
+          pacienteSelecionado = null;
+          filtrarPacientes();
+          alert("Paciente excluído.");
+        }
+      } else {
+        alert("Selecione um paciente para excluir.");
+      }
+    }
+
+    function fecharTela() {
+      alert("Fechando tela...");
+      // Em app real, redirecionaria ou fecharia modal
+    }
+
+    // Carrega tabela inicial
+    carregarTabela(pacientes);
+  </script>
+</body>
+</html>

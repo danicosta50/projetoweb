@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalhe da Consulta</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef2f3;
+      padding: 20px;
+    }
+    .container {
+      background-color: #fff;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    textarea, input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .checkbox-group {
+      margin-top: 15px;
+    }
+    .buttons {
+      margin-top: 25px;
+      display: flex;
+      justify-content: space-between;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      color: white;
+    }
+    .salvar { background-color: #28a745; }
+    .excluir { background-color: #dc3545; }
+    .fechar { background-color: #6c757d; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Detalhes da Consulta</h2>
+
+    <label for="receitaObs">Observações da Receita</label>
+    <textarea id="receitaObs" rows="4">Paciente deve tomar 1 comprimido por dia.</textarea>
+
+    <div class="checkbox-group">
+      <input type="checkbox" id="consultaRealizada" checked>
+      <label for="consultaRealizada">Consulta realizada</label>
+    </div>
+
+    <div class="buttons">
+      <button class="salvar" onclick="salvarConsulta()">Salvar</button>
+      <button class="excluir" onclick="excluirConsulta()">Excluir</button>
+      <button class="fechar" onclick="fecharTela()">Fechar</button>
+    </div>
+  </div>
+
+  <script>
+    function salvarConsulta() {
+      const obs = document.getElementById("receitaObs").value;
+      const realizada = document.getElementById("consultaRealizada").checked;
+
+      // Simula atualização da consulta
+      console.log("Consulta atualizada:");
+      console.log("Observações:", obs);
+      console.log("Realizada:", realizada);
+
+      alert("Consulta salva com sucesso!");
+    }
+
+    function excluirConsulta() {
+      // Simula exclusão
+      const confirmacao = confirm("Tem certeza que deseja excluir esta consulta?");
+      if (confirmacao) {
+        console.log("Consulta excluída.");
+        alert("Consulta excluída.");
+        fecharTela();
+      }
+    }
+
+    function fecharTela() {
+      alert("Fechando tela...");
+      // Em app real, redirecionaria ou fecharia modal
+    }
+  </script>
+</body>
+</html>

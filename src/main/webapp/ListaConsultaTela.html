@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Consultas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background-color: #fff;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .filters {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .filters input {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      flex: 1;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background-color: #0078D7;
+      color: white;
+    }
+    .buttons {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      color: white;
+    }
+    .buscar { background-color: #0078D7; }
+    .detalhes { background-color: #28a745; }
+    .excluir { background-color: #dc3545; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Lista de Consultas</h2>
+
+    <div class="filters">
+      <input type="text" id="nomePaciente" placeholder="Nome do paciente">
+      <input type="text" id="dataInicio" placeholder="Data inicial (dd/mm/yyyy)">
+      <input type="text" id="dataFim" placeholder="Data final (dd/mm/yyyy)">
+    </div>
+
+    <div class="buttons">
+      <button class="buscar" onclick="buscarConsultas()">Buscar</button>
+      <button class="detalhes" onclick="verDetalhes()">Ver Detalhes</button>
+      <button class="excluir" onclick="excluirConsulta()">Excluir</button>
+    </div>
+
+    <table id="tabelaConsultas">
+      <thead>
+        <tr>
+          <th>Nome do Paciente</th>
+          <th>Data da Consulta</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Linhas serão inseridas dinamicamente -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    const consultas = [
+      { nome: "João Silva", data: "05/08/2025" },
+      { nome: "Maria Oliveira", data: "12/08/2025" },
+      { nome: "Carlos Souza", data: "20/08/2025" }
+    ];
+
+    function carregarTabela(lista) {
+      const tbody = document.querySelector("#tabelaConsultas tbody");
+      tbody.innerHTML = "";
+      lista.forEach((consulta, index) => {
+        const row = document.createElement("tr");
+        row.setAttribute("data-index", index);
+        row.innerHTML = `
+          <td>${consulta.nome}</td>
+          <td>${consulta.data}</td>
+        `;
+        row.onclick = () => selecionarLinha(index);
+        tbody.appendChild(row);
+      });
+    }
+
+    function buscarConsultas() {
+      const nome = document.getElementById("nomePaciente").value.toLowerCase();
+      const dataIni = document.getElementById("dataInicio").value;
+      const dataFim = document.getElementById("dataFim").value;
+
+      const filtradas = consultas.filter(c => {
+        const nomeMatch = c.nome.toLowerCase().includes(nome);
+        const data = c.data.split("/").reverse().join("-");
+        const dentroDoIntervalo =
+          (!dataIni || data >= formatarData(dataIni)) &&
+          (!dataFim || data <= formatarData(dataFim));
+        return nomeMatch && dentroDoIntervalo;
+      });
+
+      carregarTabela(filtradas);
+    }
+
+    function formatarData(dataStr) {
+      const [dia, mes, ano] = dataStr.split("/");
+      return `${ano}-${mes}-${dia}`;
+    }
+
+    let consultaSelecionada = null;
+
+    function selecionarLinha(index) {
+      consultaSelecionada = index;
+      const rows = document.querySelectorAll("#tabelaConsultas tbody tr");
+      rows.forEach(row => row.style.backgroundColor = "");
+      rows[index].style.backgroundColor = "#d0e7ff";
+    }
+
+    function verDetalhes() {
+      if (consultaSelecionada !== null) {
+        const consulta = consultas[consultaSelecionada];
+        alert(`Detalhes da consulta:\nPaciente: ${consulta.nome}\nData: ${consulta.data}`);
+      } else {
+        alert("Selecione uma consulta na tabela.");
+      }
+    }
+
+    function excluirConsulta() {
+      if (consultaSelecionada !== null) {
+        const confirmacao = confirm("Deseja realmente excluir esta consulta?");
+        if (confirmacao) {
+          consultas.splice(consultaSelecionada, 1);
+          consultaSelecionada = null;
+          buscarConsultas();
+          alert("Consulta excluída.");
+        }
+      } else {
+        alert("Selecione uma consulta para excluir.");
+      }
+    }
+
+    // Carrega tabela inicial
+    carregarTabela(consultas);
+  </script>
+</body>
+</html>
