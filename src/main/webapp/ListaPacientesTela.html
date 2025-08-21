@@ -2,6 +2,8 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
   <title>Lista de Pacientes</title>
   <style>
     body {
@@ -92,15 +94,20 @@
       <button class="fechar" onclick="fecharTela()">Fechar</button>
     </div>
   </div>
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
-    const pacientes = [
-      { nome: "João Silva", cpf: "123.456.789-00" },
-      { nome: "Maria Oliveira", cpf: "987.654.321-00" },
-      { nome: "Carlos Souza", cpf: "111.222.333-44" }
-    ];
-
-    let pacienteSelecionado = null;
+   $(document).ready(function () {
+      $.ajax({
+        url: "/OdontoWebNew/api/Listapacientes", 
+        method: "GET",
+        success: function (lista) {
+          carregarTabela(lista);
+        },
+        error: function () {
+          alert("Erro ao buscar pacientes.");
+        }
+      });
+    });
 
     function carregarTabela(lista) {
       const tbody = document.querySelector("#tabelaPacientes tbody");
@@ -112,61 +119,11 @@
           <td>${paciente.nome}</td>
           <td>${paciente.cpf}</td>
         `;
-        row.onclick = () => selecionarLinha(index);
         tbody.appendChild(row);
       });
     }
 
-    function selecionarLinha(index) {
-      pacienteSelecionado = index;
-      const rows = document.querySelectorAll("#tabelaPacientes tbody tr");
-      rows.forEach(row => row.style.backgroundColor = "");
-      rows[index].style.backgroundColor = "#d0e7ff";
-    }
-
-    function filtrarPacientes() {
-      const nome = document.getElementById("nomePaciente").value.toLowerCase();
-      const cpf = document.getElementById("cpfPaciente").value;
-
-      const filtrados = pacientes.filter(p =>
-        p.nome.toLowerCase().includes(nome) &&
-        p.cpf.includes(cpf)
-      );
-
-      carregarTabela(filtrados);
-    }
-
-    function editarPaciente() {
-      if (pacienteSelecionado !== null) {
-        const paciente = pacientes[pacienteSelecionado];
-        alert(`Editar paciente:\nNome: ${paciente.nome}\nCPF: ${paciente.cpf}`);
-        // Aqui você pode redirecionar para uma tela de edição real
-      } else {
-        alert("Selecione um paciente na tabela.");
-      }
-    }
-
-    function excluirPaciente() {
-      if (pacienteSelecionado !== null) {
-        const confirmacao = confirm("Deseja realmente excluir este paciente?");
-        if (confirmacao) {
-          pacientes.splice(pacienteSelecionado, 1);
-          pacienteSelecionado = null;
-          filtrarPacientes();
-          alert("Paciente excluído.");
-        }
-      } else {
-        alert("Selecione um paciente para excluir.");
-      }
-    }
-
-    function fecharTela() {
-      alert("Fechando tela...");
-      // Em app real, redirecionaria ou fecharia modal
-    }
-
-    // Carrega tabela inicial
-    carregarTabela(pacientes);
+   
   </script>
 </body>
 </html>
