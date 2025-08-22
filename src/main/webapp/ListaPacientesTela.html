@@ -65,6 +65,9 @@
     .editar { background-color: #28a745; }
     .excluir { background-color: #dc3545; }
     .fechar { background-color: #6c757d; }
+      tr.selecionado {
+    background-color: #cce5ff;
+  }
   </style>
 </head>
 <body>
@@ -95,35 +98,102 @@
     </div>
   </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script>
-   $(document).ready(function () {
+
+<script>
+  $(document).ready(function () {
+    buscarPacientes();
+
+    // Seleciona linha da tabela ao clicar
+    $(document).on("click", "#tabelaPacientes tbody tr", function () {
+      $("#tabelaPacientes tbody tr").removeClass("selecionado");
+      $(this).addClass("selecionado");
+    });
+
+    // Função Excluir
+    $(".excluir").on("click", function () {
+      const $linha = $("#tabelaPacientes tbody tr.selecionado");
+      if ($linha.length === 0) {
+        alert("Selecione um paciente para excluir.");
+        return;
+      }
+
+      const id = $linha.data("id");
+      const nome = $linha.find("td:eq(0)").text();
+
+      if (!confirm(`Deseja excluir o paciente "${nome}"?`)) return;
+
       $.ajax({
-        url: "/OdontoWebNew/api/Listapacientes", 
-        method: "GET",
-        success: function (lista) {
-          carregarTabela(lista);
+        url: "/OdontoWebNew/api/ExcluirPaciente", 
+        method: "POST",
+        data: { id: id },
+        success: function () {
+          alert("Paciente excluído com sucesso!");
+          buscarPacientes();
         },
         error: function () {
-          alert("Erro ao buscar pacientes.");
+          alert("Erro ao excluir paciente.");
         }
       });
     });
 
-    function carregarTabela(lista) {
-      const tbody = document.querySelector("#tabelaPacientes tbody");
-      tbody.innerHTML = "";
-      lista.forEach((paciente, index) => {
-        const row = document.createElement("tr");
-        row.setAttribute("data-index", index);
-        row.innerHTML = `
+    // Função Editar
+    $(".editar").on("click", function () {
+      const $linha = $("#tabelaPacientes tbody tr.selecionado");
+      if ($linha.length === 0) {
+        alert("Selecione um paciente para editar.");
+        return;
+      }
+
+      const id = $linha.data("id");
+      window.location.href = `Paciente_cadastro.html?id=${id}`;
+    });
+
+    // Função Fechar
+    $(".fechar").on("click", function () {
+      window.location.href = "Pacientes.html";
+    });
+
+    // Filtrar pacientes conforme digitado
+    $("#nomePaciente, #cpfPaciente").on("input", function () {
+      buscarPacientes();
+    });
+  });
+
+  function buscarPacientes() {
+    const nome = $("#nomePaciente").val();
+    const cpf = $("#cpfPaciente").val();
+
+    $.ajax({
+      url: "/OdontoWebNew/api/Listapacientes",
+      method: "GET",
+      data: {
+        nome: nome,
+        cpf: cpf
+      },
+      success: function (lista) {
+        carregarTabela(lista);
+      },
+      error: function () {
+        alert("Erro ao buscar pacientes.");
+      }
+    });
+  }
+
+  function carregarTabela(lista) {
+    const $tbody = $("#tabelaPacientes tbody");
+    $tbody.empty();
+
+    $.each(lista, function (index, paciente) {
+      const row = `
+        <tr data-id="${paciente.id}">
           <td>${paciente.nome}</td>
           <td>${paciente.cpf}</td>
-        `;
-        tbody.appendChild(row);
-      });
-    }
+        </tr>
+      `;
+      $tbody.append(row);
+    });
+  }
+</script>
 
-   
-  </script>
 </body>
 </html>
