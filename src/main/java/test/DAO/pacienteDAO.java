@@ -9,6 +9,7 @@ import Entidades.paciente;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.swing.JOptionPane;
   
   public class pacienteDAO {
@@ -70,6 +71,23 @@ import javax.swing.JOptionPane;
           }
  
     } 
+         
+  public paciente buscarPorId(int id) {
+    EntityManager em = JPAUtil.getEntityManager();
+    try {
+        TypedQuery<paciente> consulta = em.createQuery(
+            "SELECT p FROM paciente p WHERE p.id = :id", paciente.class);
+        consulta.setParameter("id", id);
+
+        return consulta.getSingleResult();
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(null, "Erro ao buscar paciente por ID: " + e);
+        return null;
+    } finally {
+        JPAUtil.closeEntityManager();
+    }
+}
+
          public void excluir(int id){
       EntityManager em = JPAUtil.getEntityManager();
       try{
@@ -88,30 +106,38 @@ import javax.swing.JOptionPane;
       }
     }  
      
-     public void atualizar(paciente paciente){
-      EntityManager em = JPAUtil.getEntityManager();
-      try{
-        paciente p  = em.find(paciente.class, paciente.getId());
+     public boolean atualizar(paciente paciente) {
+    EntityManager em = JPAUtil.getEntityManager();
+    try {
+        paciente p = em.find(paciente.class, paciente.getId());
 
-          if(p != null){
-              em.getTransaction().begin();
-             p.setCpf(paciente.getCpf());
-             p.setDataNasc(paciente.getDataNasc());
+        if (p != null) {
+            em.getTransaction().begin();
+
+            p.setCpf(paciente.getCpf());
+            p.setDataNasc(paciente.getDataNasc());
             p.setEmail(paciente.getEmail());
             p.setEndereco(paciente.getEndereco());
-           p.setHistorico_medico(paciente.getHistorico_medico());
-           p.setNome(paciente.getNome());
-           p.setTelefone(paciente.getTelefone());
-              em.getTransaction().commit();
-          }
-      }catch(Exception e){
-          em.getTransaction().rollback();
-          throw e;
-      }
-      finally{
-          JPAUtil.closeEntityManager();
-      }
-    }  
+            p.setHistorico_medico(paciente.getHistorico_medico());
+            p.setNome(paciente.getNome());
+            p.setTelefone(paciente.getTelefone());
+
+            em.getTransaction().commit();
+            return true;
+        } else {
+            return false;
+        }
+    } catch (Exception e) {
+        if (em.getTransaction().isActive()) {
+            em.getTransaction().rollback();
+        }
+        e.printStackTrace(); // ou log personalizado
+        return false;
+    } finally {
+        JPAUtil.closeEntityManager();
+    }
+}
+
      
     
 }
