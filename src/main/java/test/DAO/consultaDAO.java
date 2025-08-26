@@ -27,30 +27,23 @@ import javax.swing.JOptionPane;
               JPAUtil.closeEntityManager();
           }
       }
- 
-public List<consulta> listar(String nome) {  
+ public List<consulta> listar(String nome) {
     EntityManager em = JPAUtil.getEntityManager();
     try {
-        String textoquery = " SELECT C FROM consulta C "
-                + "WHERE (:nome is null OR C.nomePaciente LIKE :nome ) "
-               ;
-        Query consultaSql = em.createQuery(textoquery);     
-        
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        
-       
-        consultaSql.setParameter("nome", nome.isEmpty() ? null : "%" + nome + "%" );       
+        String jpql = "SELECT C FROM consulta C WHERE LOWER(C.nomePaciente) LIKE :nome";
+        Query query = em.createQuery(jpql);
+        query.setParameter("nome", "%" + nome.toLowerCase() + "%");
 
-        List<consulta> consultasLista = consultaSql.getResultList();
-        return consultasLista;
-    } catch(Exception e) {
-        em.getTransaction().rollback();
-        JOptionPane.showMessageDialog(null, "Erro ao listar consultas: " + e);
+        return query.getResultList();
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(null, "Erro ao listar consultas: " + e.getMessage());
         throw e;
     } finally {
         JPAUtil.closeEntityManager();
     }
 }
+
 public List<consulta> listar(String nome, String dataIni, String dataFim) {  
     EntityManager em = JPAUtil.getEntityManager();
     try {
@@ -116,7 +109,24 @@ public List<consulta> listar(String nome, String dataIni, String dataFim) {
           JPAUtil.closeEntityManager();
       }
     }  
-         
+        
+   public List<consulta> listar_Nome(String nome) {
+    EntityManager em = JPAUtil.getEntityManager();
+    try {
+        String jpql = "SELECT C FROM consulta C WHERE LOWER(C.nomePaciente) LIKE :nome";
+        Query query = em.createQuery(jpql);
+        query.setParameter("nome", "%" + nome.toLowerCase() + "%");
+
+        return query.getResultList();
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(null, "Erro ao listar consultas: " + e.getMessage());
+        throw e;
+    } finally {
+        JPAUtil.closeEntityManager();
+    }
+}
+
          
    public void atualizar(consulta consulta){
       EntityManager em = JPAUtil.getEntityManager();

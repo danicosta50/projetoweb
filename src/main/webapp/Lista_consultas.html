@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Consultas</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background-color: #fff;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .filters {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .filters input {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      flex: 1;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background-color: #0078D7;
+      color: white;
+    }
+    .buttons {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      color: white;
+    }
+    .pesquisar {background-color: #0078D7;}
+    .editar { background-color: #28a745; }
+    .excluir { background-color: #dc3545; }
+    .fechar { background-color: #6c757d; }
+    tr.selecionado {
+      background-color: #cce5ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Lista de Consultas</h2>
+
+    <div class="filters">
+      <input type="text" id="nomePaciente" placeholder="Nome do paciente">
+
+
+    </div>
+
+    <table id="tabelaConsultas">
+      <thead>
+        <tr>
+          <th>Paciente</th>
+          <th>Data</th>
+          <th>Descrição</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Linhas serão inseridas dinamicamente -->
+      </tbody>
+    </table>
+
+    <div class="buttons">
+      <button class="pesquisar" onclick="validarCamposConsulta()">Pesquisar</button>
+
+      <button class="editar" onclick="editarConsulta()">Editar</button>
+      <button class="excluir" onclick="excluirConsulta()">Excluir</button>
+      <button class="fechar" onclick="fecharTela()">Fechar</button>
+    </div>
+  </div>
+
+<script>
+  $(document).ready(function () {
+    buscarConsultasInicio();
+
+    $(document).on("click", "#tabelaConsultas tbody tr", function () {
+      $("#tabelaConsultas tbody tr").removeClass("selecionado");
+      $(this).addClass("selecionado");
+    });
+
+    $(".excluir").on("click", function () {
+      const $linha = $("#tabelaConsultas tbody tr.selecionado");
+      if ($linha.length === 0) {
+        alert("Selecione uma consulta para excluir.");
+        return;
+      }
+
+      const id = $linha.data("id");
+      const nome = $linha.find("td:eq(0)").text();
+
+      if (!confirm(`Deseja excluir a consulta de "${nome}"?`)) return;
+
+      $.ajax({
+        url: "/OdontoWebNew/api/ExcluirConsulta",
+        method: "POST",
+        data: { id: id },
+        success: function () {
+          alert("Consulta excluída com sucesso!");
+          buscarConsultas();
+        },
+        error: function () {
+          alert("Erro ao excluir consulta.");
+        }
+      });
+    });
+
+    $(".fechar").on("click", function () {
+      window.location.href = "Consultas.html";
+    });
+
+  
+  });
+
+  function editarConsulta() {
+    const $linha = $("#tabelaConsultas tbody tr.selecionado");
+    if ($linha.length === 0) {
+      alert("Selecione uma consulta para editar.");
+      return;
+    }
+
+    const id = $linha.data("id");
+    if (id) {
+      window.location.href = `Consulta_cadastro.html?id=${id}`;
+    } else {
+      alert("ID da consulta não encontrado.");
+    }
+  }
+
+
+function buscarConsultasInicio() {
+  
+
+  $.ajax({
+    url: "/OdontoWebNew/api/ListaconsultasInicial",
+    method: "GET",
+  
+    success: function (lista) {
+      carregarTabela(lista);
+    },
+    error: function () {
+      alert("Erro ao buscar consultas.");
+    }
+  });
+}
+
+function buscarConsultas() {
+  
+   const nome = $("#nomePaciente").val().trim();
+
+
+  $.ajax({
+    url: "/OdontoWebNew/api/Listaconsultas",
+    method: "GET",
+    data: {
+      nome: nome
+     
+    },
+    success: function (lista) {
+      carregarTabela(lista);
+    },
+  error: function (xhr) {
+  alert("Erro ao buscar consultas: " + xhr.responseText);
+}
+  });
+}
+function validarCamposConsulta() {
+  const nome = $("#nomePaciente").val().trim();
+
+
+  if (nome === "") {
+    alert("Por favor, preencha o nome");
+    return;
+  }
+
+  buscarConsultas(); 
+}
+
+
+  function carregarTabela(lista) {
+    const $tbody = $("#tabelaConsultas tbody");
+    $tbody.empty();
+
+    lista.sort((a, b) => new Date(b.dataConsulta) - new Date(a.dataConsulta)); // Ordena por data decrescente
+
+    $.each(lista, function (index, consulta) {
+      const row = `
+        <tr data-id="${consulta.id}">
+          <td>${consulta.nomePaciente}</td>
+          <td>${consulta.dataConsulta}</td>
+          <td>${consulta.descricao}</td>
+        </tr>
+      `;
+      $tbody.append(row);
+    });
+  }
+</script>
+
+</body>
+</html>
